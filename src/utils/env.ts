@@ -1,7 +1,7 @@
 export const ENV =  {
 
 BASE_URL:process.env.BASE_URL || '',
-username:process.env.username || '',
-password:process.env.password || '',
+USERNAME:process.env.USERNAME || '',
+PASSWORD:process.env.PASSWORD || '',
 
 };
