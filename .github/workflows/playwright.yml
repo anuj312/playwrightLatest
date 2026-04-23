@@ -1,14 +1,22 @@
 name: Playwright Tests
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag to run (@smoke, @regression, etc.)"
         required: true
         default: "@smoke"
+
+      browser:
+        description: "Browser (chromium/firefox/webkit)"
+        required: true
+        default: "chromium"
+
+      workers:
+        description: "Number of parallel workers"
+        required: true
+        default: "2"
 
 jobs:
   test:
@@ -17,8 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox]
-        shardIndex: [1, 2]
+        shardIndex: [1, 2]   # 🔥 2 shards (parallel split)
 
     steps:
       # 📥 Checkout code
@@ -35,30 +42,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 🌐 Install browsers
+      # 🌐 Install Playwright browsers
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # 🧪 Run tests with TAG + SHARD + BROWSER
+      # 🧪 Run tests (dynamic)
       - name: Run Playwright Tests
         run: |
           npx playwright test \
-          --project=${{ matrix.browser }} \
+          --project=${{ github.event.inputs.browser }} \
+          --workers=${{ github.event.inputs.workers }} \
           --shard=${{ matrix.shardIndex }}/2 \
           -g "${{ github.event.inputs.tag }}"
 
       # 📊 Upload HTML report
-      - name: Upload Report
+      - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.browser }}-${{ matrix.shardIndex }}
+          name: playwright-report-${{ matrix.shardIndex }}
           path: playwright-report/
 
-      # 📸 Upload screenshots/videos (if enabled)
+      # 📸 Upload screenshots/videos
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.browser }}-${{ matrix.shardIndex }}
+          name: test-results-${{ matrix.shardIndex }}
           path: test-results/
