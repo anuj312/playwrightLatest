@@ -47,9 +47,9 @@ export class login extends base {
 
       async Validlogin(){
          await this.loginbtn.click();
-         await this.username.fill(ENV.username);
+         await this.username.fill(ENV.USERNAME);
           await this.page.waitForTimeout(2000);
-         await this.password.fill(ENV.password);
+         await this.password.fill(ENV.USERNAME);
           await this.page.waitForTimeout(2000);
          await this.submit.click();
           await this.page.waitForTimeout(2000);
